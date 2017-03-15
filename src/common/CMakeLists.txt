@@ -95,6 +95,7 @@ endif()
 create_directory_groups(${SRCS} ${HEADERS})
 
 add_library(common STATIC ${SRCS} ${HEADERS})
+target_link_libraries(common spdlog)
 if (ARCHITECTURE_x86_64)
     target_link_libraries(common xbyak)
 endif()
