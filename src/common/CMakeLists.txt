@@ -30,6 +30,7 @@ set(SRCS
             framebuffer_layout.cpp
             hash.cpp
             logging/backend.cpp
+            logging/backend_spdlog.cpp
             logging/filter.cpp
             logging/formatter.cpp
             logging/text_formatter.cpp
@@ -60,6 +61,7 @@ set(HEADERS
             hash.h
             linear_disk_cache.h
             logging/backend.h
+            logging/backend_spdlog.h
             logging/filter.h
             logging/formatter.h
             logging/log.h

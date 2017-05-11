@@ -1,3 +1,5 @@
+#include <chrono>
+#include <string>
 #include "common/assert.h"
 #include "common/logging/formatter.h"
 
@@ -5,7 +7,7 @@ namespace Log {
 
 Formatter::Formatter() {}
 
-static const char* GetLevelName(spdlog::level_t log_level) {
+const char* GetLevelName(spdlog::level_t log_level) {
     switch (log_level) {
     case spdlog::level::trace:
         return "Trace";
@@ -21,6 +23,7 @@ static const char* GetLevelName(spdlog::level_t log_level) {
         return "Critical";
     default:
         UNREACHABLE();
+        return "UNREACHABLE";
     }
 }
 
@@ -34,11 +37,12 @@ void Formatter::format(spdlog::details::log_msg& msg) {
     unsigned int time_seconds = static_cast<unsigned int>(timestamp.count() / 1000000);
     unsigned int time_fractional = static_cast<unsigned int>(timestamp.count() % 1000000);
 
-    msg.formatted << '[' << fmt::pad(time_seconds, ' ', 4) << '.'
-                  << fmt::pad(time_fractional, '0', 6) << "] ";
+    msg.formatted << '[' << fmt::pad(time_seconds, 4, ' ') << '.'
+                  << fmt::pad(time_fractional, 6, '0') << "] ";
     msg.formatted << *msg.logger_name << " <" << GetLevelName(msg.level) << "> ";
 
     msg.formatted << fmt::StringRef(msg.raw.data(), msg.raw.size());
+    msg.formatted.write(spdlog::details::os::eol, spdlog::details::os::eol_size);
 }
 
 } // namespace Log
