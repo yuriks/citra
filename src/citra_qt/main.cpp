@@ -49,6 +49,8 @@
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
 #endif
 
+REGISTER_LOGGER("Main");
+
 GMainWindow::GMainWindow() : config(new Config()), emu_thread(nullptr) {
     Pica::g_debug_context = Pica::DebugContext::Construct();
     setAcceptDrops(true);
@@ -315,14 +317,13 @@ bool GMainWindow::LoadROM(const QString& filename) {
     if (result != Core::System::ResultStatus::Success) {
         switch (result) {
         case Core::System::ResultStatus::ErrorGetLoader:
-            LOG_CRITICAL(Frontend, "Failed to obtain loader for %s!",
-                         filename.toStdString().c_str());
+            SPDLOG_CRITICAL("Failed to obtain loader for {}!", filename.toStdString());
             QMessageBox::critical(this, tr("Error while loading ROM!"),
                                   tr("The ROM format is not supported."));
             break;
 
         case Core::System::ResultStatus::ErrorSystemMode:
-            LOG_CRITICAL(Frontend, "Failed to load ROM!");
+            SPDLOG_CRITICAL("Failed to load ROM!");
             QMessageBox::critical(this, tr("Error while loading ROM!"),
                                   tr("Could not determine the system mode."));
             break;
@@ -357,7 +358,7 @@ bool GMainWindow::LoadROM(const QString& filename) {
 }
 
 void GMainWindow::BootGame(const QString& filename) {
-    LOG_INFO(Frontend, "Citra starting...");
+    SPDLOG_INFO("Citra starting...");
     StoreRecentFile(filename); // Put the filename on top of the list
 
     if (!LoadROM(filename))
@@ -482,7 +483,7 @@ void GMainWindow::OnGameListOpenSaveFolder(u64 program_id) {
         return;
     }
 
-    LOG_INFO(Frontend, "Opening save data path for program_id=%" PRIu64, program_id);
+    SPDLOG_INFO("Opening save data path for program_id={0:#x}", program_id);
     QDesktopServices::openUrl(QUrl::fromLocalFile(qpath));
 }
 

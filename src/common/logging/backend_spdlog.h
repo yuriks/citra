@@ -10,11 +10,11 @@ public:
     static SpdLogBackend& instance();
 
     SpdLogBackend(SpdLogBackend const&) = delete;
-    void operator=(SpdLogBackend const&) = delete;
+    SpdLogBackend& operator=(SpdLogBackend const&) = delete;
 
     u32 RegisterLogger(const char* class_name);
 
-    const std::shared_ptr<spdlog::logger> GetLogger(u32 logger) const;
+    const std::shared_ptr<spdlog::logger>& GetLogger(u32 logger) const;
 
 private:
     SpdLogBackend();

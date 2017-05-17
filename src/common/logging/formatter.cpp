@@ -3,11 +3,7 @@
 #include "common/assert.h"
 #include "common/logging/formatter.h"
 
-namespace Log {
-
-Formatter::Formatter() {}
-
-const char* GetLevelName(spdlog::level_t log_level) {
+static const char* GetLevelName(spdlog::level_t log_level) {
     switch (log_level) {
     case spdlog::level::trace:
         return "Trace";
@@ -16,7 +12,7 @@ const char* GetLevelName(spdlog::level_t log_level) {
     case spdlog::level::info:
         return "Info";
     case spdlog::level::warn:
-        return "Warn";
+        return "Warning";
     case spdlog::level::err:
         return "Error";
     case spdlog::level::critical:
@@ -26,6 +22,8 @@ const char* GetLevelName(spdlog::level_t log_level) {
         return "UNREACHABLE";
     }
 }
+
+namespace Log {
 
 void Formatter::format(spdlog::details::log_msg& msg) {
     using std::chrono::steady_clock;

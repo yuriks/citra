@@ -1,7 +1,30 @@
+#include <spdlog/spdlog.h>
+
 #include "common/assert.h"
 #include "common/logging/backend_spdlog.h"
 #include "common/logging/formatter.h"
 #include "common/string_util.h"
+
+static spdlog::level::level_enum GetLevel(Log::Level log_level) {
+    switch (log_level) {
+    case Log::Level::Trace:
+        return spdlog::level::trace;
+    case Log::Level::Debug:
+        return spdlog::level::debug;
+    case Log::Level::Info:
+        return spdlog::level::info;
+    case Log::Level::Warning:
+        return spdlog::level::warn;
+    case Log::Level::Error:
+        return spdlog::level::err;
+    case Log::Level::Critical:
+        return spdlog::level::critical;
+    default:
+        UNREACHABLE();
+        break;
+    }
+    return spdlog::level::off;
+}
 
 namespace Log {
 
@@ -31,54 +54,18 @@ SpdLogBackend::~SpdLogBackend() {
     spdlog::drop_all();
 }
 
-const std::shared_ptr<spdlog::logger> SpdLogBackend::GetLogger(u32 logger) const {
+const std::shared_ptr<spdlog::logger>& SpdLogBackend::GetLogger(u32 logger) const {
     return loggers[logger];
 }
 
 u32 SpdLogBackend::RegisterLogger(const char* class_name) {
-    loggers.push_back(std::make_shared<spdlog::logger>(class_name, sinks.begin(), sinks.end()));
+    loggers.push_back(spdlog::create(class_name, sinks.begin(), sinks.end()));
     return loggers.size() - 1;
 }
 
-spdlog::level_t GetLevel(Level log_level) {
-    switch (log_level) {
-    case Level::Trace:
-        return spdlog::level::trace;
-    case Level::Debug:
-        return spdlog::level::debug;
-    case Level::Info:
-        return spdlog::level::info;
-    case Level::Warning:
-        return spdlog::level::warn;
-    case Level::Error:
-        return spdlog::level::err;
-    case Level::Critical:
-        return spdlog::level::critical;
-    default:
-        UNREACHABLE();
-        break;
-    }
-    return spdlog::level::off;
-}
-
-template <typename Arg1, typename... Args>
-void SpdLogMessage(u32 logger, Level log_level, const char* filename, unsigned int line_nr,
-                   const char* function, const char* format, const Arg1& arg, const Args&... args) {
+void SpdLogImpl(u32 logger, Level log_level, const char* format, fmt::ArgList& args) {
     auto log = SpdLogBackend::instance().GetLogger(logger);
-    fmt::MemoryWriter formatting_buffer;
-    formatting_buffer << Common::TrimSourcePath(filename) << ':' << function << ':' << line_nr
-                      << ": " << format;
-    log->log(GetLevel(log_level), formatting_buffer.c_str(), arg, args...);
-}
-
-template <typename T>
-void SpdLogMessage(u32 logger, Level log_level, const char* filename, unsigned int line_nr,
-                   const char* function, const T& msg) {
-    auto log = SpdLogBackend::instance().GetLogger(logger);
-    fmt::MemoryWriter formatting_buffer;
-    formatting_buffer << Common::TrimSourcePath(filename) << ':' << function << ':' << line_nr
-                      << ": " << msg;
-    log->log(GetLevel(log_level), formatting_buffer.c_str());
+    log->log(GetLevel(log_level), format, args);
 }
 
 u32 RegisterLogger(const char* class_name) {

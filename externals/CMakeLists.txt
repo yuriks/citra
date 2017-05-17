@@ -9,7 +9,10 @@ endif()
 
 add_subdirectory(cryptopp)
 
+add_subdirectory(fmt)
+
 # while spdlog has a cmakelists file, it pollutes our cmake if we include it directly
 # thankfully its header only so we can just include the directory
 add_library(spdlog INTERFACE)
+target_compile_definitions(spdlog INTERFACE -DSPDLOG_FMT_EXTERNAL=1)
 target_include_directories(spdlog INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/spdlog/include)

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include "common/common_types.h"
 
 namespace Log {
@@ -106,12 +107,19 @@ void LogMessage(Class log_class, Level log_level, const char* filename, unsigned
 #endif
     ;
 
+void SpdLogImpl(u32 logger, Level log_level, const char* format, fmt::ArgList& args);
+
 template <typename Arg1, typename... Args>
 void SpdLogMessage(u32 logger, Level log_level, const char* filename, unsigned int line_nr,
-                   const char* function, const char* format, const Arg1& arg, const Args&... args);
-template <typename T>
-void SpdLogMessage(u32 logger, Level log_level, const char* filename, unsigned int line_nr,
-                   const char* function, const T& msg);
+                   const char* function, const Arg1& format, const Args&... args) {
+    typedef fmt::internal::ArgArray<sizeof...(Args)> ArgArray;
+    typename ArgArray::Type array{ArgArray::template make<fmt::BasicFormatter<char>>(args)...};
+    fmt::MemoryWriter formatting_buffer;
+    formatting_buffer << Common::TrimSourcePath(filename) << ':' << function << ':' << line_nr
+                      << ": " << format;
+    SpdLogImpl(logger, log_level, formatting_buffer.c_str(),
+               fmt::ArgList(fmt::internal::make_type(args...), array));
+}
 
 u32 RegisterLogger(const char* class_name);
 
