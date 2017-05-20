@@ -65,7 +65,12 @@ std::shared_ptr<spdlog::logger> SpdLogBackend::GetLogger(const std::string& clas
     return it->second;
 }
 
-void SpdLogImpl(Logger* logger, Level log_level, const char* format, fmt::ArgList& args) {
+void SpdLogMessage(Logger* logger, Level log_level, const char* filename, unsigned int line_nr,
+    const char* function, const char* format, fmt::ArgList& args) {
+    fmt::MemoryWriter formatting_buffer;
+    formatting_buffer << Common::TrimSourcePath(filename) << ':' << function << ':' << line_nr
+        << ": " << format;
+
     logger->log(GetLevel(log_level), format, args);
 }
 
