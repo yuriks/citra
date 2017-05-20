@@ -54,21 +54,25 @@ SpdLogBackend::~SpdLogBackend() {
     spdlog::drop_all();
 }
 
-const std::shared_ptr<spdlog::logger>& SpdLogBackend::GetLogger(u32 logger) const {
-    return loggers[logger];
+std::shared_ptr<spdlog::logger> SpdLogBackend::GetLogger(const std::string& class_name) {
+    auto it = loggers_map.find(class_name);
+    if (it != loggers_map.end()) {
+        return it->second;
+    }
+
+    it = loggers_map.emplace_hint(it, class_name,
+                                  spdlog::create(class_name, sinks.begin(), sinks.end()));
+    return it->second;
 }
 
-u32 SpdLogBackend::RegisterLogger(const char* class_name) {
-    loggers.push_back(spdlog::create(class_name, sinks.begin(), sinks.end()));
-    return loggers.size() - 1;
+void SpdLogImpl(Logger* logger, Level log_level, const char* format, fmt::ArgList& args) {
+    logger->log(GetLevel(log_level), format, args);
 }
 
-void SpdLogImpl(u32 logger, Level log_level, const char* format, fmt::ArgList& args) {
-    auto log = SpdLogBackend::instance().GetLogger(logger);
-    log->log(GetLevel(log_level), format, args);
+Logger* GetLogger(const char* class_name) {
+    // This instance is global and will never be destroyed, so it's safe to return just the raw
+    // pointer, because the logger will always be kept alive by the map in the backend.
+    return SpdLogBackend::instance().GetLogger(class_name).get();
 }
 
-u32 RegisterLogger(const char* class_name) {
-    return SpdLogBackend::instance().RegisterLogger(class_name);
-}
 }; // namespace Log

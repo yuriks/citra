@@ -12,16 +12,14 @@ public:
     SpdLogBackend(SpdLogBackend const&) = delete;
     SpdLogBackend& operator=(SpdLogBackend const&) = delete;
 
-    u32 RegisterLogger(const char* class_name);
-
-    const std::shared_ptr<spdlog::logger>& GetLogger(u32 logger) const;
+    std::shared_ptr<spdlog::logger> GetLogger(const std::string& class_name);
 
 private:
     SpdLogBackend();
 
     ~SpdLogBackend();
 
-    std::vector<std::shared_ptr<spdlog::logger>> loggers;
+    std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers_map;
     std::vector<spdlog::sink_ptr> sinks;
 };
 } // namespace Log
