@@ -152,6 +152,7 @@ enum class ErrorModule : u32 {
     QTM = 96,
     NFP = 97,
 
+    Citra = 253,
     Application = 254,
     InvalidResult = 255
 };
