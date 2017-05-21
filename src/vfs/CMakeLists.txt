@@ -1,5 +1,7 @@
 add_library(vfs STATIC
     file.h
+    memory_file.cpp
+    memory_file.h
     vfs.h
 )
 

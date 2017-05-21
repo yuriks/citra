@@ -17,9 +17,6 @@ class File : public Common::VirtualPrintable {
 public:
     virtual ~File() = default;
 
-    /// Returns a descriptive string for the filesystem, for debugging purposes.
-    virtual std::string DebugStr() const = 0;
-
     /**
      * Reads data from the file.
      *
