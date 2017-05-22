@@ -11,6 +11,7 @@ add_executable(tests
     glad.cpp
     tests.cpp
     vfs/memory_file.cpp
+    vfs/subrange_file.cpp
 )
 
 if (ARCHITECTURE_x86_64)
