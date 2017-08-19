@@ -17,7 +17,7 @@ std::string SubrangeFile::DebugStr() const {
                        *base_file);
 }
 
-ResultVal<size_t> SubrangeFile::Read(u64 offset, size_t length, u8* buffer) const {
+ResultVal<size_t> SubrangeFile::Read(u64 offset, size_t length, u8* buffer) {
     if (offset >= file_size) {
         // Attempt to read past EOF
         return MakeResult<size_t>(0);

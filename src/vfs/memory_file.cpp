@@ -15,7 +15,7 @@ std::string MemoryFile::DebugStr() const {
     return fmt::format("MemoryFile{{size={}}}", data.size());
 }
 
-ResultVal<size_t> MemoryFile::Read(u64 offset, size_t length, u8* buffer) const {
+ResultVal<size_t> MemoryFile::Read(u64 offset, size_t length, u8* buffer) {
     if (offset >= data.size()) {
         // Attempt to read past EOF
         return MakeResult<size_t>(0);

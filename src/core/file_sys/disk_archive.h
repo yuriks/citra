@@ -14,6 +14,7 @@
 #include "core/file_sys/directory_backend.h"
 #include "core/file_sys/file_backend.h"
 #include "core/hle/result.h"
+#include "vfs/host_file.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FileSys namespace
@@ -31,7 +32,7 @@ public:
     ResultVal<size_t> Write(u64 offset, size_t length, bool flush, const u8* buffer) override;
     u64 GetSize() const override;
     bool SetSize(u64 size) const override;
-    bool Close() const override;
+    bool Close() override;
 
     void Flush() const override {
         file->Flush();
@@ -40,6 +41,24 @@ public:
 protected:
     Mode mode;
     std::unique_ptr<FileUtil::IOFile> file;
+};
+
+class VfsDiskFile : public FileBackend {
+public:
+    VfsDiskFile(std::unique_ptr<Vfs::HostFile> vfs_file);
+
+    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) const override;
+    ResultVal<size_t> Write(u64 offset, size_t length, bool flush, const u8* buffer) override;
+    u64 GetSize() const override;
+    bool SetSize(u64 size) const override;
+    bool Close() override;
+
+    void Flush() const override {
+        vfs_file->Flush();
+    }
+
+protected:
+    std::shared_ptr<Vfs::File> vfs_file;
 };
 
 class DiskDirectory : public DirectoryBackend {

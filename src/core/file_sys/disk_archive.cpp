@@ -10,6 +10,7 @@
 #include "common/logging/log.h"
 #include "core/file_sys/disk_archive.h"
 #include "core/file_sys/errors.h"
+#include "vfs/random_access_adapter.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FileSys namespace
@@ -46,8 +47,65 @@ bool DiskFile::SetSize(const u64 size) const {
     return true;
 }
 
-bool DiskFile::Close() const {
+bool DiskFile::Close() {
     return file->Close();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VfsDiskFile::VfsDiskFile(std::unique_ptr<Vfs::HostFile> vfs_file)
+    : vfs_file(std::make_shared<Vfs::RandomAccessAdapter>(std::move(vfs_file))) {}
+
+ResultVal<size_t> VfsDiskFile::Read(u64 offset, size_t length, u8* buffer) const {
+    auto result = vfs_file->Read(offset, length, buffer);
+    if (result.Succeeded())
+        return result;
+    else if (result.Code() == Vfs::ERR_INVALID_OPEN_MODE)
+        return ERROR_INVALID_OPEN_FLAGS;
+    else {
+        LOG_ERROR(Service_FS, "Unhandled vfs error: %08x", result.Code().raw);
+        return result;
+    }
+}
+
+ResultVal<size_t> VfsDiskFile::Write(u64 offset, size_t length, bool flush,
+                                     const u8* buffer) {
+    auto result = vfs_file->Write(offset, length, buffer);
+    if (result.Succeeded()) {
+        if (flush)
+            vfs_file->Flush();
+        return result;
+    } else if (result.Code() == Vfs::ERR_INVALID_OPEN_MODE)
+        return ERROR_INVALID_OPEN_FLAGS;
+    else {
+        LOG_ERROR(Service_FS, "Unhandled vfs error: %08x", result.Code().raw);
+        return result;
+    }
+}
+
+u64 VfsDiskFile::GetSize() const {
+    auto result = vfs_file->GetSize();
+    if (result.Succeeded())
+        return result.Unwrap();
+    else {
+        LOG_ERROR(Service_FS, "Unhandled vfs error: %08x", result.Code().raw);
+        return 0;
+    }
+}
+
+bool VfsDiskFile::SetSize(u64 size) const {
+    auto result = vfs_file->SetSize(size);
+    if (result.IsSuccess()) {
+        vfs_file->Flush();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool VfsDiskFile::Close() {
+    vfs_file = nullptr;
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

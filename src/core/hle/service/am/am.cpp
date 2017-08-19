@@ -233,7 +233,7 @@ bool CIAFile::SetSize(u64 size) const {
     return false;
 }
 
-bool CIAFile::Close() const {
+bool CIAFile::Close() {
     bool complete = true;
     for (size_t i = 0; i < container.GetTitleMetadata().GetContentCount(); i++) {
         if (content_written[i] < container.GetContentSize(i))

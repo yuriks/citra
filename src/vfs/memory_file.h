@@ -14,7 +14,7 @@ public:
     explicit MemoryFile(std::vector<u8> data);
 
     std::string DebugStr() const override;
-    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) const override;
+    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) override;
     ResultVal<size_t> Write(u64 offset, size_t length, const u8* buffer) override;
     ResultVal<u64> GetSize() const override;
     ResultCode SetSize(u64 size) override;

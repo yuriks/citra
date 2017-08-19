@@ -56,6 +56,9 @@ protected:
     constexpr NonCopyable() = default;
     ~NonCopyable() = default;
 
+    constexpr NonCopyable(NonCopyable&&) = default;
+    constexpr NonCopyable& operator=(NonCopyable&&) = default;
+
     NonCopyable(const NonCopyable&) = delete;
     NonCopyable& operator=(const NonCopyable&) = delete;
 };

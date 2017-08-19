@@ -11,6 +11,7 @@
 #include "core/file_sys/errors.h"
 #include "core/file_sys/path_parser.h"
 #include "core/settings.h"
+#include "vfs/host_file.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FileSys namespace
@@ -76,13 +77,19 @@ ResultVal<std::unique_ptr<FileBackend>> SDMCArchive::OpenFileBase(const Path& pa
         break; // Expected 'success' case
     }
 
-    FileUtil::IOFile file(full_path, mode.write_flag ? "r+b" : "rb");
-    if (!file.IsOpen()) {
+    Vfs::OpenMode vfs_mode = Vfs::OpenMode::NONE;
+    if (mode.read_flag) vfs_mode |= Vfs::OpenMode::READ;
+    if (mode.write_flag) vfs_mode |= Vfs::OpenMode::WRITE;
+    if (mode.create_flag) vfs_mode |= Vfs::OpenMode::CREATE;
+
+    auto vfs_file = Vfs::HostFile::Open(full_path, vfs_mode);
+    if (vfs_file.Failed()) {
         LOG_CRITICAL(Service_FS, "(unreachable) Unknown error opening %s", full_path.c_str());
         return ERROR_NOT_FOUND;
     }
 
-    auto disk_file = std::make_unique<DiskFile>(std::move(file), mode);
+    auto disk_file = std::make_unique<VfsDiskFile>(
+        std::make_unique<Vfs::HostFile>(std::move(vfs_file).Unwrap()));
     return MakeResult<std::unique_ptr<FileBackend>>(std::move(disk_file));
 }
 

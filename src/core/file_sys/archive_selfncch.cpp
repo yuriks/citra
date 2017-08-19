@@ -64,7 +64,7 @@ public:
         return false;
     }
 
-    bool Close() const override {
+    bool Close() override {
         return true;
     }
 

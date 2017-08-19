@@ -56,7 +56,7 @@ public:
     ResultVal<size_t> Write(u64 offset, size_t length, bool flush, const u8* buffer) override;
     u64 GetSize() const override;
     bool SetSize(u64 size) const override;
-    bool Close() const override {
+    bool Close() override {
         return false;
     }
     void Flush() const override {}

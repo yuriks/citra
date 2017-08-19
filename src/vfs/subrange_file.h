@@ -16,11 +16,15 @@ public:
     SubrangeFile(std::shared_ptr<File> base_file, u64 offset, u64 size);
 
     std::string DebugStr() const override;
-    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) const override;
+    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) override;
     ResultVal<size_t> Write(u64 offset, size_t length, const u8* buffer) override;
     ResultVal<u64> GetSize() const override;
     ResultCode SetSize(u64 size) override;
     ResultCode Flush() override;
+
+    std::shared_ptr<File> GetBaseFile() const {
+        return base_file;
+    }
 
 private:
     std::shared_ptr<File> base_file;
