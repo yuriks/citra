@@ -9,5 +9,9 @@
 namespace Vfs {
 
 constexpr ResultCode ERR_UNSUPPORTED_OPERATION = UnimplementedFunction(ErrorModule::Citra);
+constexpr ResultCode ERR_UNKNOWN_ERROR(1, ErrorModule::Citra, ErrorSummary::InvalidState,
+                                       ErrorLevel::Permanent);
+constexpr ResultCode ERR_END_OF_FILE(2, ErrorModule::Citra, ErrorSummary::WouldBlock,
+                                     ErrorLevel::Status);
 
 } // namespace Vfs

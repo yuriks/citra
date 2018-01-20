@@ -228,6 +228,10 @@ public:
         return nullptr != m_file;
     }
 
+    bool IsEof() const {
+        return std::feof(m_file);
+    }
+
     // m_good is set to false when a read, write or other function fails
     bool IsGood() const {
         return m_good;

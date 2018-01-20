@@ -1,5 +1,7 @@
 add_library(vfs STATIC
     file.h
+    host_file.cpp
+    host_file.h
     memory_file.cpp
     memory_file.h
     random_access_adapter.cpp
