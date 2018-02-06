@@ -62,6 +62,7 @@ add_library(common STATIC
     platform.h
     printable.h
     quaternion.h
+    result.h
     scm_rev.cpp
     scm_rev.h
     scope_exit.h
