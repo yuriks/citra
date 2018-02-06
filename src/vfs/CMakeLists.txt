@@ -13,4 +13,4 @@ add_library(vfs STATIC
 
 create_target_directory_groups(vfs)
 
-target_link_libraries(vfs PUBLIC common core)
+target_link_libraries(vfs PUBLIC common)

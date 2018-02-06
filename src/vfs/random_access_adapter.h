@@ -18,12 +18,12 @@ public:
 
     void DebugFmt(fmt::Writer& w) const override;
 
-    ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) override;
-    ResultVal<size_t> Write(u64 offset, size_t length, const u8* buffer) override;
-    ResultVal<u64> GetSize() override;
-    ResultCode SetSize(u64 size) override;
-    ResultCode Close() override;
-    ResultCode Flush() override;
+    Result<size_t> Read(u64 offset, size_t length, u8* buffer) override;
+    Result<size_t> Write(u64 offset, size_t length, const u8* buffer) override;
+    Result<u64> GetSize() override;
+    Result<> SetSize(u64 size) override;
+    Result<> Close() override;
+    Result<> Flush() override;
 
     const StreamFile& GetBaseFile() const {
         return *base_file;

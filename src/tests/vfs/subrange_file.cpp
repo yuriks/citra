@@ -95,7 +95,7 @@ TEST_CASE("SubrangeFile", "[vfs]") {
     SECTION("Flush succeeds") {
         SubrangeFile file(mem_file, 0, 5);
         auto result = file.Flush();
-        REQUIRE(result.IsSuccess());
+        REQUIRE(result.Succeeded());
     }
 }
 

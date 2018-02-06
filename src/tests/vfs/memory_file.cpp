@@ -60,17 +60,17 @@ TEST_CASE("MemoryFile", "[vfs]") {
     }
     SECTION("Resize to smaller truncates") {
         auto result = file.SetSize(3);
-        REQUIRE(result.IsSuccess());
+        REQUIRE(result.Succeeded());
         REQUIRE(file.GetSize().Unwrap() == 3);
     }
     SECTION("Resize to larger fills with zeros") {
         auto result = file.SetSize(7);
-        REQUIRE(result.IsSuccess());
+        REQUIRE(result.Succeeded());
         REQUIRE(file.GetData() == (std::vector<u8>{0, 1, 2, 3, 4, 0, 0}));
     }
     SECTION("Flush succeeds") {
         auto result = file.Flush();
-        REQUIRE(result.IsSuccess());
+        REQUIRE(result.Succeeded());
     }
 }
 

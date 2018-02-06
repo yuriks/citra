@@ -15,7 +15,7 @@ namespace Vfs {
 
 class HostFile : public StreamFile {
 public:
-    static ResultVal<HostFile> Open(std::string path);
+    static Result<HostFile> Open(std::string path);
     HostFile(FileUtil::IOFile&& file, std::string debug_path);
     HostFile(FileUtil::IOFile&& file);
     ~HostFile();
@@ -25,14 +25,14 @@ public:
 
     void DebugFmt(fmt::Writer& w) const override;
 
-    ResultVal<size_t> Read(size_t length, u8* buffer) override;
-    ResultVal<size_t> Write(size_t length, const u8* buffer) override;
-    ResultCode Seek(u64 offset_from_beginning) override;
-    ResultVal<u64> Tell() override;
-    ResultVal<u64> GetSize() const override;
-    ResultCode SetSize(u64 size) override;
-    ResultCode Close() override;
-    ResultCode Flush() override;
+    Result<size_t> Read(size_t length, u8* buffer) override;
+    Result<size_t> Write(size_t length, const u8* buffer) override;
+    Result<> Seek(u64 offset_from_beginning) override;
+    Result<u64> Tell() override;
+    Result<u64> GetSize() const override;
+    Result<> SetSize(u64 size) override;
+    Result<> Close() override;
+    Result<> Flush() override;
 
     const FileUtil::IOFile& GetHostFile() const {
         return file;

@@ -6,12 +6,12 @@
 
 namespace Vfs {
 
-ResultVal<HostFile> HostFile::Open(std::string path) {
+Result<HostFile> HostFile::Open(std::string path) {
     FileUtil::IOFile file;
     if (!file.Open(path, "rb")) {
-        return ERR_UNKNOWN_ERROR;
+        return Error::UnknownError;
     }
-    return MakeResult<HostFile>(std::move(file), std::move(path));
+    return HostFile(std::move(file), std::move(path));
 }
 
 HostFile::HostFile(FileUtil::IOFile&& file, std::string debug_path)
@@ -25,47 +25,47 @@ void HostFile::DebugFmt(fmt::Writer& w) const {
     w.write("HostFile{{path={}}}", debug_path);
 }
 
-ResultVal<size_t> HostFile::Read(size_t length, u8* buffer) {
+Result<size_t> HostFile::Read(size_t length, u8* buffer) {
     size_t read = file.ReadBytes(buffer, length);
 
     if (read == 0 && file.IsEof()) {
-        return ERR_END_OF_FILE;
+        return Error::EndOfFile;
     } else if (read == -1) {
-        return ERR_UNKNOWN_ERROR;
+        return Error::UnknownError;
     } else {
-        return MakeResult<size_t>(read);
+        return read;
     }
 }
 
-ResultVal<size_t> HostFile::Write(size_t length, const u8* buffer) {
-    return ERR_UNSUPPORTED_OPERATION;
+Result<size_t> HostFile::Write(size_t length, const u8* buffer) {
+    return Error::UnsupportedOperation;
 }
 
-ResultCode HostFile::Seek(u64 offset_from_beginning) {
+Result<> HostFile::Seek(u64 offset_from_beginning) {
     file.Clear();
-    return file.Seek(offset_from_beginning, SEEK_SET) ? RESULT_SUCCESS : ERR_UNKNOWN_ERROR;
+    return file.Seek(offset_from_beginning, SEEK_SET) ? Ok : Error::UnknownError;
 }
 
-ResultVal<u64> HostFile::Tell() {
+Result<u64> HostFile::Tell() {
     u64 offset = file.Tell();
-    return offset != -1 ? MakeResult<u64>(offset) : ERR_UNKNOWN_ERROR;
+    return offset != -1 ? Result<u64>(offset) : Error::UnknownError;
 }
 
-ResultVal<u64> HostFile::GetSize() const {
-    return MakeResult<u64>(file.GetSize());
+Result<u64> HostFile::GetSize() const {
+    return file.GetSize();
 }
 
-ResultCode HostFile::SetSize(u64 size) {
-    return ERR_UNSUPPORTED_OPERATION;
+Result<> HostFile::SetSize(u64 size) {
+    return Error::UnsupportedOperation;
 }
 
-ResultCode HostFile::Close() {
+Result<> HostFile::Close() {
     file.Clear();
-    return file.Close() ? RESULT_SUCCESS : ERR_UNKNOWN_ERROR;
+    return file.Close() ? Ok : Error::UnknownError;
 }
 
-ResultCode HostFile::Flush() {
-    return RESULT_SUCCESS;
+Result<> HostFile::Flush() {
+    return Ok;
 }
 
 } // namespace Vfs

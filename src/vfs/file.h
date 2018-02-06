@@ -25,7 +25,7 @@ public:
      * @param buffer buffer to receive the read data
      * @return number of bytes actually read
      */
-    virtual ResultVal<size_t> Read(u64 offset, size_t length, u8* buffer) = 0;
+    virtual Result<size_t> Read(u64 offset, size_t length, u8* buffer) = 0;
 
     /**
      * Writes data to the file.
@@ -35,10 +35,10 @@ public:
      * @param buffer buffer to write data from
      * @return number of bytes actually written
      */
-    virtual ResultVal<size_t> Write(u64 offset, size_t length, const u8* buffer) = 0;
+    virtual Result<size_t> Write(u64 offset, size_t length, const u8* buffer) = 0;
 
     /** Returns the size of the file in bytes. */
-    virtual ResultVal<u64> GetSize() = 0;
+    virtual Result<u64> GetSize() = 0;
 
     /**
      * Changes the size of the file. If smaller than the current size, the file will be truncated.
@@ -46,28 +46,28 @@ public:
      *
      * @param size new size of the file, in bytes
      */
-    virtual ResultCode SetSize(u64 size) = 0;
+    virtual Result<> SetSize(u64 size) = 0;
 
     /** Closes the file. */
-    virtual ResultCode Close() = 0;
+    virtual Result<> Close() = 0;
 
     /** Flushes any pending writes. */
-    virtual ResultCode Flush() = 0;
+    virtual Result<> Flush() = 0;
 };
 
 /// Abstract implementation of File, which stubs out functions unsupported for read-only files.
 class ReadOnlyFile : public File {
 public:
-    ResultVal<size_t> Write(u64 offset, size_t length, const u8* buffer) override {
-        return ERR_UNSUPPORTED_OPERATION;
+    Result<size_t> Write(u64 offset, size_t length, const u8* buffer) override {
+        return Error::UnsupportedOperation;
     }
 
-    ResultCode SetSize(u64 size) override {
-        return ERR_UNSUPPORTED_OPERATION;
+    Result<> SetSize(u64 size) override {
+        return Error::UnsupportedOperation;
     }
 
-    ResultCode Flush() override {
-        return RESULT_SUCCESS;
+    Result<> Flush() override {
+        return Ok;
     }
 };
 
@@ -82,7 +82,7 @@ public:
      * @param buffer buffer to receive the read data
      * @return number of bytes actually read, or ERR_END_OF_FILE if at EOF
      */
-    virtual ResultVal<size_t> Read(size_t length, u8* buffer) = 0;
+    virtual Result<size_t> Read(size_t length, u8* buffer) = 0;
 
     /**
      * Writes data to the file and advances the cursor by the amount written.
@@ -91,7 +91,7 @@ public:
      * @param buffer buffer to write data from
      * @return number of bytes actually written
      */
-    virtual ResultVal<size_t> Write(size_t length, const u8* buffer) = 0;
+    virtual Result<size_t> Write(size_t length, const u8* buffer) = 0;
 
     /**
      * Moves the read/write cursor to a different position in the file.
@@ -99,13 +99,13 @@ public:
      * @param offset_from_beginning offset inside the file to move the cursor to
      * @return ERR_END_OF_FILE if position is outside current file bounds
      */
-    virtual ResultCode Seek(u64 offset_from_beginning) = 0;
+    virtual Result<> Seek(u64 offset_from_beginning) = 0;
 
     /** Returns the position of the read/write cursor in bytes from the beginning of the file. */
-    virtual ResultVal<u64> Tell() = 0;
+    virtual Result<u64> Tell() = 0;
 
     /** Returns the size of the file in bytes. */
-    virtual ResultVal<u64> GetSize() const = 0;
+    virtual Result<u64> GetSize() const = 0;
 
     /**
      * Changes the size of the file. If smaller than the current size, the file will be truncated.
@@ -113,13 +113,13 @@ public:
      *
      * @param size new size of the file, in bytes
      */
-    virtual ResultCode SetSize(u64 size) = 0;
+    virtual Result<> SetSize(u64 size) = 0;
 
     /** Closes the file. */
-    virtual ResultCode Close() = 0;
+    virtual Result<> Close() = 0;
 
     /** Flushes any pending writes. */
-    virtual ResultCode Flush() = 0;
+    virtual Result<> Flush() = 0;
 };
 
 } // namespace Vfs

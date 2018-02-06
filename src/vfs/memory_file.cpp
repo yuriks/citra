@@ -15,41 +15,41 @@ void MemoryFile::DebugFmt(fmt::Writer& w) const {
     w.write("MemoryFile{{size={}}}", data.size());
 }
 
-ResultVal<size_t> MemoryFile::Read(u64 offset, size_t length, u8* buffer) {
+Result<size_t> MemoryFile::Read(u64 offset, size_t length, u8* buffer) {
     if (offset >= data.size()) {
         // Attempt to read past EOF
-        return MakeResult<size_t>(0);
+        return 0;
     }
     size_t read_size = std::min(length, data.size() - offset);
     std::copy_n(data.begin() + offset, read_size, buffer);
-    return MakeResult<size_t>(read_size);
+    return read_size;
 }
 
-ResultVal<size_t> MemoryFile::Write(u64 offset, size_t length, const u8* buffer) {
+Result<size_t> MemoryFile::Write(u64 offset, size_t length, const u8* buffer) {
     if (offset >= data.size()) {
         // Attempt to write past EOF
-        return MakeResult<size_t>(0);
+        return 0;
     }
     size_t write_size = std::min(length, data.size() - offset);
     std::copy_n(buffer, write_size, data.begin() + offset);
-    return MakeResult<size_t>(write_size);
+    return write_size;
 }
 
-ResultVal<u64> MemoryFile::GetSize() {
-    return MakeResult<u64>(data.size());
+Result<u64> MemoryFile::GetSize() {
+    return data.size();
 }
 
-ResultCode MemoryFile::SetSize(u64 size) {
+Result<> MemoryFile::SetSize(u64 size) {
     data.resize(size);
-    return RESULT_SUCCESS;
+    return Ok;
 }
 
-ResultCode MemoryFile::Close() {
-    return RESULT_SUCCESS;
+Result<> MemoryFile::Close() {
+    return Ok;
 }
 
-ResultCode MemoryFile::Flush() {
-    return RESULT_SUCCESS;
+Result<> MemoryFile::Flush() {
+    return Ok;
 }
 
 } // namespace Vfs
