@@ -4,71 +4,73 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
+#include <boost/optional.hpp>
 #include "common/common_funcs.h"
 
 namespace Common {
 
 struct OkType {};
+struct ErrType {};
 
-template <typename T = OkType, typename E = boost::blank>
-class Result : public boost::variant<T, E> {
+template <typename T = OkType, typename E = ErrType>
+class Result {
 public:
-    // boost::variant guarantees that if any type has a nothrow constructor, then assignments will
-    // never heap allocate and instead the variant will be set to that type. We want to enforce
-    // this, so assert that the Error type fits that criteria.
-    static_assert(boost::has_nothrow_constructor<E>::value, "Error type in Result must have "
-                                                            "nothrow default constructor in order "
-                                                            "to avoid heap allocations");
-
-    using boost::variant<T, E>::variant;
+    Result(const T& value) : value(boost::in_place_init, value) {}
+    Result(const E& error) : error(boost::in_place_init, error) {}
+    Result(T&& value) : value(boost::in_place_init, std::move(value)) {}
+    Result(E&& error) : error(boost::in_place_init, std::move(error)) {}
 
     bool Succeeded() const {
-        return this->which() == 0;
+        return static_cast<bool>(value);
     }
 
     bool Failed() const {
-        return this->which() == 1;
+        return static_cast<bool>(error);
     }
 
     /// Asserts that the result succeeded and returns a reference to it.
     T& Unwrap() & {
         // TODO(yuriks): Try to format the E type here if possible
         ASSERT_MSG(Succeeded(), "Tried to Unwrap failed ResultVal");
-        return boost::get<T>(*this);
+        return *value;
     }
 
     const T& Unwrap() const& {
         ASSERT_MSG(Succeeded(), "Tried to Unwrap failed ResultVal");
-        return boost::get<T>(*this);
+        return *value;
     }
 
     T&& Unwrap() && {
         ASSERT_MSG(Succeeded(), "Tried to Unwrap failed ResultVal");
-        return std::move(boost::get<T>(*this));
+        return std::move(*value);
     }
 
     /// Asserts that the result failed and returns a reference to the error
     E& UnwrapErr() & {
         // TODO(yuriks): Try to format the T type here if possible
         ASSERT_MSG(Failed(), "Tried to UnwrapErr successful ResultVal");
-        return boost::get<E>(*this);
+        return *error;
     }
 
-    E& UnwrapErr() const& {
+    const E& UnwrapErr() const& {
         ASSERT_MSG(Failed(), "Tried to UnwrapErr successful ResultVal");
-        return boost::get<E>(*this);
+        return *error;
     }
 
     E&& UnwrapErr() && {
         ASSERT_MSG(Failed(), "Tried to Unwrap successful ResultVal");
-        return boost::get<E>(std::move(*this));
+        return std::move(*error);
     }
+
+private:
+    // Invariant: Exactly one of value or error contains a value
+    boost::optional<T> value;
+    boost::optional<E> error;
 };
 
 #define CASCADE_COMMON_RESULT(target, source)                                                      \
     auto CONCAT2(check_result_L, __LINE__) = source;                                               \
-    if (!CONCAT2(check_result_L, __LINE__).Succeeded())                                            \
+    if (CONCAT2(check_result_L, __LINE__).Failed())                                                \
         return CONCAT2(check_result_L, __LINE__).UnwrapErr();                                      \
     target = std::move(CONCAT2(check_result_L, __LINE__).Unwrap())
 
